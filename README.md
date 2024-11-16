@@ -1,17 +1,19 @@
-Cricket Scoring Project Specification Document
-Project Overview
+## Cricket Scoring Project Specification Document
+
+<h1>Project Overview</h1>
+
 The Cricket Scoring Project aims to develop a robust backend system using Node.js and TypeScript for accurately tracking and updating cricket scores. The system will handle various scenarios in cricket scoring, including special cases like overthrows, no-balls, wides, and wickets. The project will involve creating a flexible and dynamic data schema to manage scoring outcomes and an admin panel frontend interface for real-time scoring and editing capabilities.
 
-Backend Requirements
+## Backend Requirements
 
-Technology Stack
+<h1>Technology Stack</h1>
 
 ●	Backend: Node.js with TypeScript
 ●	Database: MongoDB
 ●	API Framework: Nest.js/Express.js (or an equivalent framework)
 ●	Frontend: No specification
 
-Schema Design
+## Schema Design
 
 The developer is responsible for designing the payload schema to be sent from the frontend. The schema should handle various cricket scoring scenarios, including but not limited to:
 
@@ -36,7 +38,7 @@ The developer is responsible for designing the payload schema to be sent from th
 ●	wide with legbye and overthrow
 ●	wicket
 
-Outcome Effects
+## Outcome Effects
 
 Each scenario will have specific effects on the batsman stats, bowler stats, extras, team stats, and the overall match progress. The developer must clearly implement some of these unique effects as described below:
 
@@ -69,7 +71,7 @@ Each scenario will have specific effects on the batsman stats, bowler stats, ext
 6.	Runs + OT (Overthrow):
 ○	All runs credited to the batsman account.
  
-Frontend Requirements
+## Frontend Requirements
 
 ●	The frontend will include an Admin Panel UI. The actual project UI will be provided as a reference. The developer will need to incorporate several buttons and features in the UI, such as:
 ○	Buttons for adding extras, overthrows, byes, legbyes.
@@ -78,7 +80,7 @@ Frontend Requirements
 ○	Handling tick/untick functionality on buttons.
 ○	Adding or removing deliveries in case of scoring errors.
 
-Difference between delivery and ball
+## Difference between delivery and ball
 
 ●	Delivery: All deliveries (legal and illegal) such as wides and no balls should be counted.
 ●	Ball: Only legal balls (excluding no balls) should be counted.
