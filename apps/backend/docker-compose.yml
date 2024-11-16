@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: cricstat_db
+    image: postgres
+    restart: always
+    ports:
+      - 2000:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - db_data_cricstat:/var/lib/postgresql/data
+volumes:
+  db_data_cricstat:

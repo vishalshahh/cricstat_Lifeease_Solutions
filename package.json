@@ -1,0 +1,37 @@
+{
+  "name": "cricstat",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev:all": "npm-run-all --parallel dev:backend dev:frontend dev:studio",
+    "dev:backend": "cd apps/backend && yarn dev",
+    "dev:frontend": "cd apps/frontend && yarn dev",
+    "dev:studio": "cd apps/backend && yarn prisma studio",
+    "install:all": "cd apps/backend && yarn install && cd ../frontend && yarn install",
+    "format": "prettier  \"{apps,libs}/**/*.{ts,tsx,js,json}\" --ignore-path .gitignore",
+    "format:check": "yarn format --check",
+    "format:write": "yarn format --write",
+    "tsc": "yarn --parallel -r run tsc",
+    "lint": "yarn --parallel -r run lint",
+    "validate": "yarn format:write && yarn tsc && yarn lint && yarn build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@radix-ui/react-select": "^2.1.2",
+    "@radix-ui/react-slot": "^1.1.0",
+    "class-transformer": "^0.5.1",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.460.0",
+    "tailwind-merge": "^2.5.4",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CricketEvent {
+  id            String   @id @default(uuid())
+  matchId       String
+  eventType     String
+  eventTime     DateTime
+  over          Int
+  ball          Int
+  batsmanId     String
+  bowlerId      String
+  normalRuns    Int      @default(0)
+  overthrowRuns Int      @default(0)
+  byeRuns       Int      @default(0)
+  legbyeRuns    Int      @default(0)
+  isNoBall      Boolean  @default(false)
+  isWide        Boolean  @default(false)
+  isBye         Boolean  @default(false)
+  isLegBye      Boolean  @default(false)
+  isWicket      Boolean  @default(false)
+  wicketType    String?
+  fielderId     String?
+  comment       String?
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  batsman       Player   @relation("Batsman", fields: [batsmanId], references: [id])
+  bowler        Player   @relation("Bowler", fields: [bowlerId], references: [id])
+  fielder       Player?  @relation("Fielder", fields: [fielderId], references: [id])
+  match         Match    @relation(fields: [matchId], references: [id])
+}
+
+model Match {
+  id         String         @id @default(uuid())
+  totalOvers Int
+  createdAt  DateTime       @default(now())
+  events     CricketEvent[]
+  teamStats  Team[]         @relation("MatchTeams")
+}
+
+model Team {
+  id      String   @id @default(uuid())
+  matchId String
+  runs    Int      @default(0)
+  wickets Int      @default(0)
+  extras  Extras?
+  players Player[]
+  match   Match    @relation("MatchTeams", fields: [matchId], references: [id])
+}
+
+model Player {
+  id                     String         @id @default(uuid())
+  teamId                 String
+  name                   String
+  runs                   Int            @default(0)
+  ballsFaced             Int            @default(0)
+  ballsBowled            Int            @default(0)
+  runsConceded           Int            @default(0)
+  wicketsTaken           Int            @default(0)
+  cricketEventsAsBatsman CricketEvent[] @relation("Batsman")
+  cricketEventsAsBowler  CricketEvent[] @relation("Bowler")
+  cricketEventsAsFielder CricketEvent[] @relation("Fielder")
+  team                   Team           @relation(fields: [teamId], references: [id])
+}
+
+model Extras {
+  id      String @id @default(uuid())
+  teamId  String @unique
+  wides   Int    @default(0)
+  noBalls Int    @default(0)
+  byes    Int    @default(0)
+  legByes Int    @default(0)
+  team    Team   @relation(fields: [teamId], references: [id])
+}
