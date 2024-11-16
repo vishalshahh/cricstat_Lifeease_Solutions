@@ -1,12 +1,12 @@
 ## Cricket Scoring Project Specification Document
 
-<h1>Project Overview</h1>
+<h2>Project Overview</h2>
 
 The Cricket Scoring Project aims to develop a robust backend system using Node.js and TypeScript for accurately tracking and updating cricket scores. The system will handle various scenarios in cricket scoring, including special cases like overthrows, no-balls, wides, and wickets. The project will involve creating a flexible and dynamic data schema to manage scoring outcomes and an admin panel frontend interface for real-time scoring and editing capabilities.
 
 ## Backend Requirements
 
-<h1>Technology Stack</h1>
+<h2>Technology Stack</h2>
 
 ●	Backend: Node.js with TypeScript
 ●	Database: MongoDB
@@ -48,27 +48,31 @@ Each scenario will have specific effects on the batsman stats, bowler stats, ext
 ○	All runs are added to the team data.
 ○	No runs are credited to the batsman.
 ○	Wide extra includes all runs.
-2.	Noball + bye:
+</br>
+3.	Noball + bye:
 ○	Batsman balls increase by 1.
 ○	1 run conceded to bowler data.
 ○	All runs are added to the team data.
 ○	No runs are credited to the batsman.
 ○	1 run credited to noball in extras and others added as bye.
-3.	Noball + runs:
+</br>
+4.	Noball + runs:
 ○	Batsman balls increase by 1.
 ○	All runs are considered for bowler data.
 ○	All runs, except 1, are credited to the batsman.
 ○	1 run is credited to noball in extras.
-4.	Noball + legbye:
+</br>
+6.	Noball + legbye:
 ○	Batsman balls increase by 1.
 ○	1 run conceded to bowler data.
 ○	All runs are added to team data.
 ○	No runs are credited to the batsman.
 ○	1 run is added to noball in extras and others as legbye.
-5.	Legbye/Bye + Overthrow:
+</br>
+8.	Legbye/Bye + Overthrow:
 ○	Treated as a normal legbye/bye.
 ○	All runs added in extras as bye or legbye.
-6.	Runs + OT (Overthrow):
+9.	Runs + OT (Overthrow):
 ○	All runs credited to the batsman account.
  
 ## Frontend Requirements
