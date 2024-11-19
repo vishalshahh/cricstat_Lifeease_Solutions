@@ -1,90 +1,145 @@
-## Cricket Scoring Project Specification Document
+# Cricket Scoring Project Specification Document
 
-<h2>Project Overview</h2>
+<img src="(https://github.com/vishalshahh/cricstat_Lifeease_Solutions/blob/main/apps/frontend/public/images/User%20Interface.png)" alt="Admin Panel" width="150"/>
 
-The Cricket Scoring Project aims to develop a robust backend system using Node.js and TypeScript for accurately tracking and updating cricket scores. The system will handle various scenarios in cricket scoring, including special cases like overthrows, no-balls, wides, and wickets. The project will involve creating a flexible and dynamic data schema to manage scoring outcomes and an admin panel frontend interface for real-time scoring and editing capabilities.
+## Project Overview
+
+The **Cricket Scoring Project** aims to develop a robust backend system using **Node.js** and **TypeScript** for accurately tracking and updating cricket scores. This system will handle various cricket scoring scenarios, including special cases like overthrows, no-balls, wides, and wickets. Additionally, the project will involve creating a flexible and dynamic data schema to manage scoring outcomes and an **Admin Panel frontend interface** for real-time scoring and editing capabilities.
+
+---
 
 ## Backend Requirements
 
-<h2>Technology Stack</h2>
+### Technology Stack
 
-●	Backend: Node.js with TypeScript
-●	Database: MongoDB
-●	API Framework: Nest.js/Express.js (or an equivalent framework)
-●	Frontend: No specification
+- **Backend**: Node.js with TypeScript  
+- **Database**: MongoDB  
+- **API Framework**: Nest.js or Express.js (or equivalent framework)  
+- **Frontend**: Not specified  
+
+---
 
 ## Schema Design
 
-The developer is responsible for designing the payload schema to be sent from the frontend. The schema should handle various cricket scoring scenarios, including but not limited to:
+The developer is responsible for designing the payload schema sent from the frontend. The schema must account for various cricket scoring scenarios, including but not limited to:
 
-●	normal
-●	normal with overthrow
-●	overthrow
-●	bye
-●	bye with overthrow
-●	legbye
-●	legbye with overthrow
-●	noball
-●	noball with overthrow
-●	noball with bye
-●	noball with bye and overthrow
-●	noball with legbye
-●	noball with legbye and overthrow
-●	wide 
-●	wide with overthrow
-●	wide with bye
-●	wide with bye and overthrow
-●	wide with legbye
-●	wide with legbye and overthrow
-●	wicket
+- **Normal**
+- **Normal with Overthrow**
+- **Overthrow**
+- **Bye**
+- **Bye with Overthrow**
+- **Legbye**
+- **Legbye with Overthrow**
+- **Noball**
+- **Noball with Overthrow**
+- **Noball with Bye**
+- **Noball with Bye and Overthrow**
+- **Noball with Legbye**
+- **Noball with Legbye and Overthrow**
+- **Wide**
+- **Wide with Overthrow**
+- **Wide with Bye**
+- **Wide with Bye and Overthrow**
+- **Wide with Legbye**
+- **Wide with Legbye and Overthrow**
+- **Wicket**
+
+---
 
 ## Outcome Effects
 
-Each scenario will have specific effects on the batsman stats, bowler stats, extras, team stats, and the overall match progress. The developer must clearly implement some of these unique effects as described below:
+Each scenario will have unique effects on **batsman stats**, **bowler stats**, **extras**, **team stats**, and **match progress**. Below are some detailed examples:
 
-1.	Wide + runs:
-○	No balls increase.
-○	1 run conceded in bowler data.
-○	All runs are added to the team data.
-○	No runs are credited to the batsman.
-○	Wide extra includes all runs.
-</br>
-3.	Noball + bye:
-○	Batsman balls increase by 1.
-○	1 run conceded to bowler data.
-○	All runs are added to the team data.
-○	No runs are credited to the batsman.
-○	1 run credited to noball in extras and others added as bye.
-</br>
-4.	Noball + runs:
-○	Batsman balls increase by 1.
-○	All runs are considered for bowler data.
-○	All runs, except 1, are credited to the batsman.
-○	1 run is credited to noball in extras.
-</br>
-6.	Noball + legbye:
-○	Batsman balls increase by 1.
-○	1 run conceded to bowler data.
-○	All runs are added to team data.
-○	No runs are credited to the batsman.
-○	1 run is added to noball in extras and others as legbye.
-</br>
-8.	Legbye/Bye + Overthrow:
-○	Treated as a normal legbye/bye.
-○	All runs added in extras as bye or legbye.
-9.	Runs + OT (Overthrow):
-○	All runs credited to the batsman account.
- 
+### Wide + Runs
+- **Bowler Stats**:
+  - Increase in "No Balls" count.
+  - 1 run conceded.  
+- **Batsman Stats**:
+  - No runs credited.  
+- **Team Stats**:
+  - All runs added to the team's total.  
+- **Extras**:
+  - All runs categorized under "Wide Extras."
+
+### Noball + Bye
+- **Bowler Stats**:
+  - 1 run conceded.  
+- **Batsman Stats**:
+  - "Balls Faced" increases by 1.  
+  - No runs credited.  
+- **Team Stats**:
+  - All runs added to the team's total.  
+- **Extras**:
+  - 1 run categorized as "No Ball Extras."
+  - Remaining runs categorized under "Bye Extras."
+
+### Noball + Runs
+- **Bowler Stats**:
+  - All runs conceded are accounted for.  
+- **Batsman Stats**:
+  - "Balls Faced" increases by 1.  
+  - All runs (except 1) credited to the batsman.  
+- **Team Stats**:
+  - All runs added to the team's total.  
+- **Extras**:
+  - 1 run categorized as "No Ball Extras."
+
+### Noball + Legbye
+- **Bowler Stats**:
+  - 1 run conceded.  
+- **Batsman Stats**:
+  - "Balls Faced" increases by 1.  
+  - No runs credited.  
+- **Team Stats**:
+  - All runs added to the team's total.  
+- **Extras**:
+  - 1 run categorized as "No Ball Extras."
+  - Remaining runs categorized as "Leg Bye Extras."
+
+### Legbye/Bye + Overthrow
+- **Extras**:
+  - All runs categorized under "Bye" or "Leg Bye Extras."  
+- **Team Stats**:
+  - Runs added to the team's total.
+
+### Runs + Overthrow
+- **Batsman Stats**:
+  - All runs credited to the batsman.  
+- **Team Stats**:
+  - Runs added to the team's total.
+
+---
+
 ## Frontend Requirements
 
-●	The frontend will include an Admin Panel UI. The actual project UI will be provided as a reference. The developer will need to incorporate several buttons and features in the UI, such as:
-○	Buttons for adding extras, overthrows, byes, legbyes.
-○	Batsman and bowler scorecards (balls/runs for batsman; over/runs/maidens for bowler).
-○	Last wicket details, runs/over.
-○	Handling tick/untick functionality on buttons.
-○	Adding or removing deliveries in case of scoring errors.
+### Admin Panel UI
+The **Admin Panel** will include a comprehensive and interactive UI for real-time scoring. Key features include:
 
-## Difference between delivery and ball
+- **Buttons**:
+  - Adding extras (Wides, No Balls, Byes, Leg Byes).
+  - Managing overthrows.  
+- **Scorecards**:
+  - **Batsman**: Balls faced, runs scored.
+  - **Bowler**: Overs bowled, runs conceded, maidens bowled.  
+- **Game Details**:
+  - Last wicket details.
+  - Runs scored per over.  
+- **Functionalities**:
+  - Tick/untick options for delivery scenarios.
+  - Adding or removing deliveries for error correction.
 
-●	Delivery: All deliveries (legal and illegal) such as wides and no balls should be counted.
-●	Ball: Only legal balls (excluding no balls) should be counted.
+---
+
+## Difference Between Delivery and Ball
+
+- **Delivery**:  
+  Includes all types of deliveries, both legal and illegal (e.g., Wides, No Balls).  
+
+- **Ball**:  
+  Refers to only legal deliveries (excludes No Balls).  
+
+---
+
+## Conclusion
+
+This project aims to create a comprehensive cricket scoring solution by combining backend robustness, frontend interactivity, and detailed data tracking. The flexibility in managing various scoring scenarios ensures accuracy and usability for end users.
