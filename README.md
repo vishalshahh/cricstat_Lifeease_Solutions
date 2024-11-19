@@ -15,7 +15,7 @@ The **Cricket Scoring Project** aims to develop a robust backend system using **
 - **Backend**: Node.js with TypeScript  
 - **Database**: MongoDB  
 - **API Framework**: Nest.js or Express.js (or equivalent framework)  
-- **Frontend**: Not specified  
+- **Frontend**: Next.js, TailwindCSS  
 
 ---
 
