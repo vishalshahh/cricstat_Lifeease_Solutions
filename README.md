@@ -1,6 +1,6 @@
 # Cricket Scoring Project Specification Document
 
-<img src="(https://github.com/vishalshahh/cricstat_Lifeease_Solutions/blob/main/apps/frontend/public/images/User%20Interface.png)" alt="Admin Panel" width="150"/>
+<img src="https://github.com/vishalshahh/cricstat_Lifeease_Solutions/blob/main/apps/frontend/public/images/User%20Interface.png" alt="Admin Panel" width="150"/>
 
 ## Project Overview
 
