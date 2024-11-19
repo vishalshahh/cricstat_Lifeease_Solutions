@@ -2,7 +2,7 @@
 
 ## Frontend
 
-![Admin Panel UI](https://github.com/vishalshahh/cricstat_Lifeease_Solutions/blob/main/apps/frontend/Admin%20Panel%20UI.png)
+![Admin Panel UI](https://github.com/vishalshahh/cricstat_Lifeease_Solutions/blob/main/apps/frontend/public/images/User%20Interface.png)
 
 First, run the development server:
 
