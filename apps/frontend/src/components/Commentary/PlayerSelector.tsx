@@ -1,31 +1,59 @@
-interface PlayerSelectorProps {
-  label: string
-  players: string[]
-  onSelect: (player: string) => void
+import React from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+
+type Player = {
+  id: string
+  name: string
 }
 
-export default function PlayerSelector({
+type PlayerSelectorProps = {
+  label: string
+  players: Player[]
+  selectedPlayer?: Player | null
+  onSelect: (player: Player) => void
+}
+
+const PlayerSelector: React.FC<PlayerSelectorProps> = ({
   label,
   players,
+  selectedPlayer,
   onSelect,
-}: PlayerSelectorProps) {
+}) => {
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">{label}</label>
-      <select
-        className="w-full border rounded-md p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        onChange={(e) => onSelect(e.target.value)}
-        defaultValue=""
+      <Select
+        value={selectedPlayer?.id}
+        onValueChange={(value) => {
+          console.log(`${label} - Selection made:`, value)
+          const player = players.find((p) => p.id === value)
+          if (player) {
+            console.log(`${label} - Found player:`, player)
+            onSelect(player)
+          }
+        }}
       >
-        <option value="" disabled>
-          Select player
-        </option>
-        {players.map((player) => (
-          <option key={player} value={player}>
-            {player}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder={`Select ${label}`}>
+            {selectedPlayer?.name || `Select ${label}`}
+          </SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {players.map((player) => (
+            <SelectItem key={player.id} value={player.id}>
+              {player.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }
+
+export default PlayerSelector

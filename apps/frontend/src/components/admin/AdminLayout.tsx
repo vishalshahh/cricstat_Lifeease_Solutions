@@ -1,4 +1,3 @@
-// components/admin/AdminLayout.tsx
 import Sidebar from './Sidebar'
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {

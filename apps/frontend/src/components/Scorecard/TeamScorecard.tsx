@@ -1,3 +1,5 @@
+import React from 'react'
+
 interface TeamScorecardProps {
   teamName: string
   runs: number
@@ -16,15 +18,19 @@ export default function TeamScorecard({
   wickets,
   extras,
 }: TeamScorecardProps) {
+  const totalExtras = extras.wide + extras.noBall + extras.bye + extras.legBye
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-xl font-bold">{teamName}</h3>
-      <div className="text-3xl font-bold">
+    <div className="space-y-2">
+      <h4 className="text-lg font-semibold">{teamName}</h4>
+      <p className="text-3xl font-bold">
         {runs}/{wickets}
-      </div>
+      </p>
       <div className="text-sm text-muted-foreground">
-        Extras: Wide - {extras.wide}, No Ball - {extras.noBall}, Bye -{' '}
-        {extras.bye}, Leg Bye - {extras.legBye}
+        <p>
+          Extras: {totalExtras} (Wd {extras.wide}, NB {extras.noBall}, B{' '}
+          {extras.bye}, LB {extras.legBye})
+        </p>
       </div>
     </div>
   )

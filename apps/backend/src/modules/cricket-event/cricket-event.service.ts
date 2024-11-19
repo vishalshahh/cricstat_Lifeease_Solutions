@@ -1,21 +1,37 @@
-// cricket-event.service.ts
 import { Injectable } from '@nestjs/common'
-import { PrismaService } from '../../prisma/prisma.service'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { CricketEvent } from 'schemas/CricketEvent.schema'
 import { CreateCricketEventDto } from './dto/create-cricket-event.dto'
+import { processCricketEvent } from '../../events/cricketEventHandler'
 
 @Injectable()
 export class CricketEventService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    @InjectModel(CricketEvent.name)
+    private cricketEventModel: Model<CricketEvent>,
+  ) {}
 
-  async create(createCricketEventDto: CreateCricketEventDto) {
-    return this.prisma.cricketEvent.create({
-      data: createCricketEventDto, // The data passed here should match the Prisma model input
+  async create(matchId: string, createCricketEventDto: CreateCricketEventDto) {
+    const createdEvent = new this.cricketEventModel({
+      ...createCricketEventDto,
+      matchId,
     })
+    await createdEvent.save()
+
+    // Process the event
+    await processCricketEvent(createdEvent, {
+      CricketEvent: this.cricketEventModel,
+      Match: undefined,
+      Team: undefined,
+      Player: undefined,
+      Extras: undefined,
+    })
+
+    return createdEvent
   }
 
-  async getEventsForMatch(matchId: string) {
-    return this.prisma.cricketEvent.findMany({
-      where: { matchId },
-    })
+  async findAll(matchId: string) {
+    return this.cricketEventModel.find({ matchId }).exec()
   }
 }

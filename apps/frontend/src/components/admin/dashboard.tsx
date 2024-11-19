@@ -1,5 +1,4 @@
-// pages/admin/dashboard.tsx
-import AdminLayout from '../../components/admin/AdminLayout'
+import AdminLayout from './AdminLayout'
 
 const Dashboard = () => {
   return (

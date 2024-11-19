@@ -1,38 +1,38 @@
-import { EventType } from './eventTypes'
+import { Model } from 'mongoose'
+import { CricketEvent } from 'schemas/CricketEvent.schema'
+import { Match } from 'schemas/Match.schema'
+import { Team } from 'schemas/Team.schema'
+import { Player } from 'schemas/Player.schema'
+import { Extras } from 'schemas/Extras.schema'
 import {
   handleWideEvent,
-  handleNoBallByeEvent,
   handleNoBallRunsEvent,
-  handleNoBallLegByeEvent,
-  handleByeLegByeOverthrowEvent,
-  handleRunsOverthrowEvent,
+  handleByeEvent,
+  handleLegByeEvent,
+  handleNormalRunsEvent,
 } from './eventEffects'
 
-// This function will receive event data and process the effects accordingly
-export async function processCricketEvent(eventData: any) {
-  const { eventType, cricketEventId, runs, byeRuns, legByeRuns } = eventData
+export async function processCricketEvent(
+  eventData: CricketEvent,
+  models: {
+    CricketEvent: Model<CricketEvent>
+    Match?: Model<Match>
+    Team?: Model<Team>
+    Player?: Model<Player>
+    Extras?: Model<Extras>
+  },
+) {
+  const { isWide, isNoBall, isBye, isLegBye, normalRuns } = eventData
 
-  switch (eventType) {
-    case EventType.WIDE:
-      await handleWideEvent(cricketEventId)
-      break
-    case EventType.NOBALL:
-      if (runs > 0) {
-        await handleNoBallRunsEvent(cricketEventId, runs)
-      } else if (byeRuns > 0) {
-        await handleNoBallByeEvent(cricketEventId, byeRuns)
-      } else if (legByeRuns > 0) {
-        await handleNoBallLegByeEvent(cricketEventId, legByeRuns)
-      }
-      break
-    case EventType.LEGBYE:
-    case EventType.BYE:
-      await handleByeLegByeOverthrowEvent(cricketEventId, runs, eventType)
-      break
-    case EventType.OVERTHROW:
-      await handleRunsOverthrowEvent(cricketEventId, runs)
-      break
-    default:
-      throw new Error('Unknown event type')
+  if (isWide) {
+    await handleWideEvent(eventData.id, models)
+  } else if (isNoBall) {
+    await handleNoBallRunsEvent(eventData.id, normalRuns, models)
+  } else if (isBye) {
+    await handleByeEvent(eventData.id, normalRuns, models)
+  } else if (isLegBye) {
+    await handleLegByeEvent(eventData.id, normalRuns, models)
+  } else if (normalRuns > 0) {
+    await handleNormalRunsEvent(eventData.id, normalRuns, models)
   }
 }

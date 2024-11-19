@@ -1,4 +1,3 @@
-// components/admin/Sidebar.tsx
 import Link from 'next/link'
 
 const Sidebar = () => {
@@ -8,17 +7,17 @@ const Sidebar = () => {
       <ul className="mt-10">
         <li className="mb-4">
           <Link href="/admin/dashboard">
-            <a className="hover:text-gray-400">Dashboard</a>
+            <span className="hover:text-gray-400">Dashboard</span>
           </Link>
         </li>
         <li className="mb-4">
           <Link href="/admin/batsman">
-            <a className="hover:text-gray-400">Batsman Scorecard</a>
+            <span className="hover:text-gray-400">Batsman Scorecard</span>
           </Link>
         </li>
         <li className="mb-4">
           <Link href="/admin/bowler">
-            <a className="hover:text-gray-400">Bowler Scorecard</a>
+            <span className="hover:text-gray-400">Bowler Scorecard</span>
           </Link>
         </li>
       </ul>

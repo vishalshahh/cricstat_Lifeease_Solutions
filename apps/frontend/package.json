@@ -2,6 +2,16 @@
   "name": "@cricstat/frontend",
   "version": "0.1.0",
   "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "libs/*"
+    ],
+    "nohoist": [
+      "**/@nestjs",
+      "**/@nestjs/**"
+    ]
+  },
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
@@ -10,13 +20,20 @@
     "tsc": "tsc --noEmit"
   },
   "dependencies": {
+    "@nestjs/mongoose": "^10.1.0",
+    "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.2",
+    "@types/mongoose": "^5.11.97",
+    "axios": "^1.7.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "lucide-react": "^0.460.0",
+    "mongoose": "^8.8.1",
     "next": "15.0.3",
     "react": "19.0.0-rc-66855b96-20241106",
     "react-dom": "19.0.0-rc-66855b96-20241106",
+    "react-toastify": "^10.0.6",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "yarn": "^1.22.22"

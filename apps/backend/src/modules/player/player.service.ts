@@ -1,20 +1,20 @@
+// player.service.ts
 import { Injectable } from '@nestjs/common'
-import { PrismaService } from '../../prisma/prisma.service'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { Player } from 'schemas/Player.schema'
 import { CreatePlayerDto } from './dto/create-player.dto'
 
 @Injectable()
 export class PlayerService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@InjectModel(Player.name) private playerModel: Model<Player>) {}
 
-  async create(createPlayerDto: CreatePlayerDto) {
-    return this.prisma.player.create({
-      data: createPlayerDto,
-    })
+  async create(createPlayerDto: CreatePlayerDto): Promise<Player> {
+    const createdPlayer = new this.playerModel(createPlayerDto)
+    return createdPlayer.save()
   }
 
-  async getPlayerStats(playerId: string) {
-    return this.prisma.player.findUnique({
-      where: { id: playerId },
-    })
+  async getPlayerStats(playerId: string): Promise<Player> {
+    return this.playerModel.findById(playerId).exec()
   }
 }

@@ -1,24 +1,24 @@
+// team.service.ts
 import { Injectable } from '@nestjs/common'
-import { PrismaService } from '../../prisma/prisma.service'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { Team } from 'schemas/Team.schema'
 import { CreateTeamDto } from './dto/create-team.dto'
 
 @Injectable()
 export class TeamService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@InjectModel(Team.name) private teamModel: Model<Team>) {}
 
-  async create(createTeamDto: CreateTeamDto) {
-    return this.prisma.team.create({
-      data: createTeamDto,
-    })
+  async create(createTeamDto: CreateTeamDto): Promise<Team> {
+    const createdTeam = new this.teamModel(createTeamDto)
+    return createdTeam.save()
   }
 
-  async getTeamStats(teamId: string) {
-    return this.prisma.team.findUnique({
-      where: { id: teamId },
-      include: {
-        players: true,
-        extras: true,
-      },
-    })
+  async getTeamStats(teamId: string): Promise<Team> {
+    return this.teamModel
+      .findById(teamId)
+      .populate('players')
+      .populate('extras')
+      .exec()
   }
 }

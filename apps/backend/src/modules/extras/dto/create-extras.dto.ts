@@ -1,8 +1,9 @@
+// extras/dto/create-extras.dto.ts
 import { IsInt, IsString } from 'class-validator'
 
 export class CreateExtrasDto {
   @IsString()
-  teamId: string // Foreign key for Team
+  teamId: string
 
   @IsInt()
   wides: number

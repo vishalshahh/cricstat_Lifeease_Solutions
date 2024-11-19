@@ -1,3 +1,4 @@
+// cricket-event/dto/create-cricket-event.dto.ts
 import {
   IsString,
   IsOptional,
@@ -30,45 +31,54 @@ export class CreateCricketEventDto {
   bowlerId: string
 
   @IsInt()
+  @IsOptional()
   normalRuns?: number
 
   @IsInt()
+  @IsOptional()
   overthrowRuns?: number
 
   @IsInt()
+  @IsOptional()
   byeRuns?: number
 
   @IsInt()
+  @IsOptional()
   legbyeRuns?: number
 
   @IsBoolean()
+  @IsOptional()
   isNoBall?: boolean
 
   @IsBoolean()
+  @IsOptional()
   isWide?: boolean
 
   @IsBoolean()
+  @IsOptional()
   isBye?: boolean
 
   @IsBoolean()
+  @IsOptional()
   isLegBye?: boolean
 
   @IsBoolean()
+  @IsOptional()
   isWicket?: boolean
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   wicketType?: string
 
-  @IsOptional()
   @IsUUID()
+  @IsOptional()
   fielderId?: string
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   comment?: string
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   description?: string
 }

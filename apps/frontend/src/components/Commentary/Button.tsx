@@ -1,6 +1,7 @@
 import React from 'react'
+import { Button } from '@/components/ui/button'
 
-const Buttons = ({
+const CommentaryButtons = ({
   onButtonClick,
 }: {
   onButtonClick: (event: string) => void
@@ -23,16 +24,17 @@ const Buttons = ({
   return (
     <div className="grid grid-cols-3 gap-2">
       {events.map((event) => (
-        <button
+        <Button
           key={event}
           onClick={() => onButtonClick(event)}
-          className="p-2 border rounded bg-gray-200 hover:bg-gray-300"
+          variant="outline"
+          className="p-2 hover:bg-gray-300"
         >
           {event}
-        </button>
+        </Button>
       ))}
     </div>
   )
 }
 
-export default Buttons
+export default CommentaryButtons

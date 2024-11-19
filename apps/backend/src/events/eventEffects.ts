@@ -1,334 +1,155 @@
-import { prisma } from '../prisma/prismaClient'
-import { EventType } from './eventTypes'
+import { Model } from 'mongoose'
+import { CricketEvent } from 'schemas/CricketEvent.schema'
+import { Match } from 'schemas/Match.schema'
+import { Team } from 'schemas/Team.schema'
+import { Player } from 'schemas/Player.schema'
+import { Extras } from 'schemas/Extras.schema'
 
-// Function to handle Wide Event
-export async function handleWideEvent(cricketEventId: string) {
-  const cricketEvent = await prisma.cricketEvent.update({
-    where: { id: cricketEventId },
-    data: {
-      normalRuns: 0,
-      isWide: true,
-      match: {
-        update: {
-          teamStats: {
-            updateMany: {
-              where: { id: { not: '' } },
-              data: {
-                runs: { increment: 1 },
-              },
-            },
-          },
-        },
-      },
-      bowler: {
-        update: {
-          runsConceded: { increment: 1 },
-        },
-      },
-    },
-    include: {
-      match: {
-        include: {
-          teamStats: {
-            include: {
-              extras: true,
-            },
-          },
-        },
-      },
-      bowler: true,
-    },
-  })
-
-  // Update extras separately
-  await prisma.extras.updateMany({
-    where: {
-      teamId: { in: cricketEvent.match.teamStats.map((team) => team.id) },
-    },
-    data: {
-      wides: { increment: 1 },
-    },
-  })
-
-  return cricketEvent
+type Models = {
+  CricketEvent: Model<CricketEvent>
+  Match?: Model<Match>
+  Team?: Model<Team>
+  Player?: Model<Player>
+  Extras?: Model<Extras>
 }
 
-// Function to handle NoBall + Bye Event
-export async function handleNoBallByeEvent(
-  cricketEventId: string,
-  byeRuns: number,
-) {
-  const cricketEvent = await prisma.cricketEvent.update({
-    where: { id: cricketEventId },
-    data: {
-      normalRuns: 0,
-      isNoBall: true,
-      isBye: true,
-      match: {
-        update: {
-          teamStats: {
-            updateMany: {
-              where: { id: { not: '' } },
-              data: {
-                runs: { increment: byeRuns },
-              },
-            },
-          },
-        },
-      },
-      bowler: {
-        update: {
-          runsConceded: { increment: 1 },
-        },
-      },
-      batsman: {
-        update: {
-          ballsFaced: { increment: 1 },
-        },
-      },
-    },
-    include: {
-      match: {
-        include: {
-          teamStats: {
-            include: {
-              extras: true,
-            },
-          },
-        },
-      },
-      bowler: true,
-      batsman: true,
-    },
-  })
+export async function handleWideEvent(eventId: string, models: Models) {
+  const event = await models.CricketEvent.findById(eventId).exec()
+  if (!event) throw new Error('Event not found')
 
-  // Update extras separately
-  await prisma.extras.updateMany({
-    where: {
-      teamId: { in: cricketEvent.match.teamStats.map((team) => team.id) },
-    },
-    data: {
-      noBalls: { increment: 1 },
-      byes: { increment: byeRuns - 1 },
-    },
-  })
+  // Update match score
+  await models.Match.findByIdAndUpdate(event.matchId, {
+    $inc: { totalRuns: 1 },
+  }).exec()
 
-  return cricketEvent
+  // Update team score
+  await models.Team.findOneAndUpdate(
+    { matchId: event.matchId },
+    { $inc: { runs: 1, 'extras.wides': 1 } },
+  ).exec()
+
+  // Update bowler stats
+  await models.Player.findByIdAndUpdate(event.bowlerId, {
+    $inc: { runsConceded: 1 },
+  }).exec()
 }
 
-// Function to handle NoBall + Runs Event
 export async function handleNoBallRunsEvent(
-  cricketEventId: string,
+  eventId: string,
   runs: number,
+  models: Models,
 ) {
-  const cricketEvent = await prisma.cricketEvent.update({
-    where: { id: cricketEventId },
-    data: {
-      normalRuns: runs - 1,
-      isNoBall: true,
-      match: {
-        update: {
-          teamStats: {
-            updateMany: {
-              where: { id: { not: '' } },
-              data: {
-                runs: { increment: runs },
-              },
-            },
-          },
-        },
-      },
-      batsman: {
-        update: {
-          runs: { increment: runs - 1 },
-          ballsFaced: { increment: 1 },
-        },
-      },
-      bowler: {
-        update: {
-          runsConceded: { increment: runs },
-        },
-      },
-    },
-    include: {
-      match: {
-        include: {
-          teamStats: {
-            include: {
-              extras: true,
-            },
-          },
-        },
-      },
-      batsman: true,
-      bowler: true,
-    },
-  })
+  const event = await models.CricketEvent.findById(eventId).exec()
+  if (!event) throw new Error('Event not found')
 
-  // Update extras separately
-  await prisma.extras.updateMany({
-    where: {
-      teamId: { in: cricketEvent.match.teamStats.map((team) => team.id) },
-    },
-    data: {
-      noBalls: { increment: 1 },
-    },
-  })
+  // Update match score
+  await models.Match.findByIdAndUpdate(event.matchId, {
+    $inc: { totalRuns: runs + 1 },
+  }).exec()
 
-  return cricketEvent
+  // Update team score
+  await models.Team.findOneAndUpdate(
+    { matchId: event.matchId },
+    { $inc: { runs: runs + 1, 'extras.noBalls': 1 } },
+  ).exec()
+
+  // Update batsman stats
+  await models.Player.findByIdAndUpdate(event.batsmanId, {
+    $inc: { runs, ballsFaced: 1 },
+  }).exec()
+
+  // Update bowler stats
+  await models.Player.findByIdAndUpdate(event.bowlerId, {
+    $inc: { runsConceded: runs + 1 },
+  }).exec()
 }
 
-// Function to handle NoBall + LegBye Event
-export async function handleNoBallLegByeEvent(
-  cricketEventId: string,
-  legByeRuns: number,
+export async function handleByeEvent(
+  eventId: string,
+  runs: number,
+  models: Models,
 ) {
-  const cricketEvent = await prisma.cricketEvent.update({
-    where: { id: cricketEventId },
-    data: {
-      normalRuns: 0,
-      isNoBall: true,
-      isLegBye: true,
-      match: {
-        update: {
-          teamStats: {
-            updateMany: {
-              where: { id: { not: '' } },
-              data: {
-                runs: { increment: legByeRuns },
-              },
-            },
-          },
-        },
-      },
-      bowler: {
-        update: {
-          runsConceded: { increment: 1 },
-        },
-      },
-      batsman: {
-        update: {
-          ballsFaced: { increment: 1 },
-        },
-      },
-    },
-    include: {
-      match: {
-        include: {
-          teamStats: {
-            include: {
-              extras: true,
-            },
-          },
-        },
-      },
-      bowler: true,
-      batsman: true,
-    },
-  })
+  const event = await models.CricketEvent.findById(eventId).exec()
+  if (!event) throw new Error('Event not found')
 
-  // Update extras separately
-  await prisma.extras.updateMany({
-    where: {
-      teamId: { in: cricketEvent.match.teamStats.map((team) => team.id) },
-    },
-    data: {
-      noBalls: { increment: 1 },
-      legByes: { increment: legByeRuns - 1 },
-    },
-  })
+  // Update match score
+  await models.Match.findByIdAndUpdate(event.matchId, {
+    $inc: { totalRuns: runs },
+  }).exec()
 
-  return cricketEvent
+  // Update team score
+  await models.Team.findOneAndUpdate(
+    { matchId: event.matchId },
+    { $inc: { runs, 'extras.byes': runs } },
+  ).exec()
+
+  // Update batsman stats (only balls faced, not runs)
+  await models.Player.findByIdAndUpdate(event.batsmanId, {
+    $inc: { ballsFaced: 1 },
+  }).exec()
+
+  // Update bowler stats (only balls bowled, not runs conceded)
+  await models.Player.findByIdAndUpdate(event.bowlerId, {
+    $inc: { ballsBowled: 1 },
+  }).exec()
 }
 
-// Function to handle LegBye/Bye + Overthrow Event
-export async function handleByeLegByeOverthrowEvent(
-  cricketEventId: string,
+export async function handleLegByeEvent(
+  eventId: string,
   runs: number,
-  type: EventType,
+  models: Models,
 ) {
-  const cricketEvent = await prisma.cricketEvent.update({
-    where: { id: cricketEventId },
-    data: {
-      normalRuns: runs,
-      isBye: type === EventType.BYE,
-      isLegBye: type === EventType.LEGBYE,
-      match: {
-        update: {
-          teamStats: {
-            updateMany: {
-              where: { id: { not: '' } },
-              data: {
-                runs: { increment: runs },
-              },
-            },
-          },
-        },
-      },
-    },
-    include: {
-      match: {
-        include: {
-          teamStats: {
-            include: {
-              extras: true,
-            },
-          },
-        },
-      },
-    },
-  })
+  const event = await models.CricketEvent.findById(eventId).exec()
+  if (!event) throw new Error('Event not found')
 
-  // Update extras separately
-  await prisma.extras.updateMany({
-    where: {
-      teamId: { in: cricketEvent.match.teamStats.map((team) => team.id) },
-    },
-    data: {
-      byes: type === EventType.BYE ? { increment: runs } : undefined,
-      legByes: type === EventType.LEGBYE ? { increment: runs } : undefined,
-    },
-  })
+  // Update match score
+  await models.Match.findByIdAndUpdate(event.matchId, {
+    $inc: { totalRuns: runs },
+  }).exec()
 
-  return cricketEvent
+  // Update team score
+  await models.Team.findOneAndUpdate(
+    { matchId: event.matchId },
+    { $inc: { runs, 'extras.legByes': runs } },
+  ).exec()
+
+  // Update batsman stats (only balls faced, not runs)
+  await models.Player.findByIdAndUpdate(event.batsmanId, {
+    $inc: { ballsFaced: 1 },
+  }).exec()
+
+  // Update bowler stats (only balls bowled, not runs conceded)
+  await models.Player.findByIdAndUpdate(event.bowlerId, {
+    $inc: { ballsBowled: 1 },
+  }).exec()
 }
 
-// Function to handle Runs + Overthrow Event
-export async function handleRunsOverthrowEvent(
-  cricketEventId: string,
+export async function handleNormalRunsEvent(
+  eventId: string,
   runs: number,
+  models: Models,
 ) {
-  const cricketEvent = await prisma.cricketEvent.update({
-    where: { id: cricketEventId },
-    data: {
-      normalRuns: runs,
-      match: {
-        update: {
-          teamStats: {
-            updateMany: {
-              where: { id: { not: '' } },
-              data: {
-                runs: { increment: runs },
-              },
-            },
-          },
-        },
-      },
-      batsman: {
-        update: {
-          runs: { increment: runs },
-        },
-      },
-    },
-    include: {
-      match: {
-        include: {
-          teamStats: true,
-        },
-      },
-      batsman: true,
-    },
-  })
+  const event = await models.CricketEvent.findById(eventId).exec()
+  if (!event) throw new Error('Event not found')
 
-  return cricketEvent
+  // Update match score
+  await models.Match.findByIdAndUpdate(event.matchId, {
+    $inc: { totalRuns: runs },
+  }).exec()
+
+  // Update team score
+  await models.Team.findOneAndUpdate(
+    { matchId: event.matchId },
+    { $inc: { runs } },
+  ).exec()
+
+  // Update batsman stats
+  await models.Player.findByIdAndUpdate(event.batsmanId, {
+    $inc: { runs, ballsFaced: 1 },
+  }).exec()
+
+  // Update bowler stats
+  await models.Player.findByIdAndUpdate(event.bowlerId, {
+    $inc: { runsConceded: runs, ballsBowled: 1 },
+  }).exec()
 }

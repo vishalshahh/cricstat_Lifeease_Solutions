@@ -8,49 +8,186 @@ import {
   ChevronUp,
   BirdIcon as Cricket,
   Shield,
+  User,
+  Activity,
 } from 'lucide-react'
-import PlayerSelector from '../components/Commentary/PlayerSelector'
-import TeamScorecard from '../components/Scorecard/TeamScorecard'
-import PlayerScorecard from '../components/Scorecard/PlayerScorecard'
-import BallLog from '../components/CommentaryLog/BallLog'
+import { useToast } from '@/hooks/use-toast'
+import BallLog from '@/components/CommentaryLog/BallLog'
 
+// Types
 type CommentaryEvent = {
   ball: number
   outcome: string
+  batsmanId?: string
+  bowlerId?: string
 }
 
-const Home = () => {
-  const [team, setTeam] = useState({
+// Player & Team Types
+type Player = {
+  id: string
+  name: string
+}
+
+type Team = {
+  id: string
+  name: string
+  runs: number
+  wickets: number
+  overs: number
+  balls: number
+  extras: {
+    wides: number
+    noBalls: number
+    byes: number
+    legByes: number
+  }
+}
+
+// Components
+const PlayerSelector: React.FC<{
+  label: string
+  players: Player[]
+  selectedPlayer: Player | null
+  onSelect: (player: Player) => void
+}> = ({ label, players, selectedPlayer, onSelect }) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-medium">{label}</label>
+    <select
+      className="w-full p-2 border rounded-md bg-background"
+      value={selectedPlayer?.id || ''}
+      onChange={(e) => {
+        const player = players.find((p) => p.id === e.target.value)
+        if (player) onSelect(player)
+      }}
+    >
+      <option value="">Select {label}</option>
+      {players.map((player) => (
+        <option key={player.id} value={player.id}>
+          {player.name}
+        </option>
+      ))}
+    </select>
+  </div>
+)
+
+const TeamScorecard: React.FC<{
+  runs: number
+  wickets: number
+  overs: number
+  balls: number
+  extras: Team['extras']
+}> = ({ runs, wickets, overs, balls, extras }) => (
+  <div className="space-y-4">
+    <div className="text-4xl font-bold text-center">
+      {runs}/{wickets}
+    </div>
+    <div className="text-lg text-center">
+      Overs: {overs}.{balls}
+    </div>
+    <div className="grid grid-cols-2 gap-4 text-sm">
+      <div>Wides: {extras.wides}</div>
+      <div>No Balls: {extras.noBalls}</div>
+      <div>Byes: {extras.byes}</div>
+      <div>Leg Byes: {extras.legByes}</div>
+    </div>
+  </div>
+)
+
+// Default players
+const DEFAULT_PLAYERS: Player[] = [
+  { id: '1', name: 'Sachin' },
+  { id: '2', name: 'Dravid' },
+  { id: '3', name: 'Ganguly' },
+  { id: '4', name: 'Dhoni' },
+  { id: '5', name: 'Kohli' },
+  { id: '6', name: 'Rohit' },
+]
+
+// Main Component
+const Page: React.FC = () => {
+  const { toast } = useToast()
+
+  const [team, setTeam] = useState<Team>({
+    id: 'default-team',
     name: 'Team A',
     runs: 0,
     wickets: 0,
-    extras: { wide: 0, noBall: 0, bye: 0, legBye: 0 },
+    overs: 0,
+    balls: 0,
+    extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
   })
-  const [players] = useState(['Sachin', 'Dravid', 'Ganguly', 'Dhoni'])
+  const [players] = useState<Player[]>(DEFAULT_PLAYERS)
+  const [selectedPlayers, setSelectedPlayers] = useState<{
+    striker: Player | null
+    nonStriker: Player | null
+    bowler: Player | null
+  }>({
+    striker: null,
+    nonStriker: null,
+    bowler: null,
+  })
   const [commentary, setCommentary] = useState<CommentaryEvent[]>([])
+  const [mobileMenuOpen, setMobileMenuOpen] = useState({
+    scoring: true,
+    teamScore: true,
+    batsmen: true,
+  })
 
   const handleEvent = (event: string) => {
-    if (event === '6') {
-      setTeam((prev) => ({ ...prev, runs: prev.runs + 6 }))
-    } else if (event === 'Wicket') {
-      setTeam((prev) => ({ ...prev, wickets: prev.wickets + 1 }))
+    if (!selectedPlayers.striker || !selectedPlayers.bowler) {
+      toast({
+        title: 'Selection Required',
+        description: 'Please select striker and bowler before scoring',
+        variant: 'destructive',
+      })
+      return
     }
+
+    setTeam((prev) => {
+      const updatedTeam = { ...prev }
+      const isNumeric = !isNaN(Number(event))
+
+      if (isNumeric) {
+        updatedTeam.runs += Number(event)
+        updatedTeam.balls += 1
+        if (updatedTeam.balls === 6) {
+          updatedTeam.balls = 0
+          updatedTeam.overs += 1
+        }
+      } else if (event === 'Wide') {
+        updatedTeam.runs += 1
+        updatedTeam.extras.wides += 1
+      } else if (event === 'No Ball') {
+        updatedTeam.runs += 1
+        updatedTeam.extras.noBalls += 1
+      } else if (event === 'Bye') {
+        updatedTeam.extras.byes += 1
+      } else if (event === 'Leg Bye') {
+        updatedTeam.extras.legByes += 1
+      } else if (event === 'Wicket') {
+        updatedTeam.wickets += 1
+        updatedTeam.balls += 1
+        if (updatedTeam.balls === 6) {
+          updatedTeam.balls = 0
+          updatedTeam.overs += 1
+        }
+      }
+
+      return updatedTeam
+    })
+
     setCommentary((prev) => [
       ...prev,
-      { ball: prev.length + 1, outcome: event },
+      {
+        ball: prev.length + 1,
+        outcome: event,
+        batsmanId: selectedPlayers.striker.id,
+        bowlerId: selectedPlayers.bowler.id,
+      },
     ])
   }
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState({
-    scoring: false,
-    teamScore: false,
-    batsmen: false,
-    bowlers: false,
-  })
-
-  type Section = 'scoring' | 'teamScore' | 'batsmen' | 'bowlers'
-
-  const toggleSection = (section: Section) => {
+  const toggleSection = (section: keyof typeof mobileMenuOpen) => {
     setMobileMenuOpen((prev) => ({
       ...prev,
       [section]: !prev[section],
@@ -59,181 +196,145 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-center gap-3 mb-8">
           <Cricket className="h-8 w-8 text-primary" />
           <h1 className="text-3xl sm:text-4xl font-bold text-center bg-gradient-to-r from-primary to-primary/80 text-transparent bg-clip-text">
             Cricket Scoring Panel
           </h1>
         </div>
-
-        <div className="grid lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Left Column - Scoring Controls */}
+        <div className="grid lg:grid-cols-2 gap-6">
           <div className="space-y-6">
-            {/* Commentary Buttons */}
-            <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <div className="flex justify-between items-center mb-6">
+            <Card className="p-6">
+              <div
+                className="flex justify-between items-center mb-6 cursor-pointer"
+                onClick={() => toggleSection('scoring')}
+              >
                 <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
+                  <User className="h-5 w-5 text-primary" />
                   Player Selection
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="lg:hidden"
-                  onClick={() => toggleSection('scoring')}
-                >
-                  {mobileMenuOpen.scoring ? <ChevronUp /> : <ChevronDown />}
-                </Button>
+                {mobileMenuOpen.scoring ? <ChevronUp /> : <ChevronDown />}
               </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <PlayerSelector
-                  label="Striker"
-                  players={players}
-                  onSelect={(player) => console.log(`Striker: ${player}`)}
-                />
-                <PlayerSelector
-                  label="Non-Striker"
-                  players={players}
-                  onSelect={(player) => console.log(`Non-Striker: ${player}`)}
-                />
-              </div>
+              {mobileMenuOpen.scoring && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <PlayerSelector
+                    label="Striker"
+                    players={players}
+                    selectedPlayer={selectedPlayers.striker}
+                    onSelect={(player) =>
+                      setSelectedPlayers((prev) => ({
+                        ...prev,
+                        striker: player,
+                      }))
+                    }
+                  />
+                  <PlayerSelector
+                    label="Non-Striker"
+                    players={players}
+                    selectedPlayer={selectedPlayers.nonStriker}
+                    onSelect={(player) =>
+                      setSelectedPlayers((prev) => ({
+                        ...prev,
+                        nonStriker: player,
+                      }))
+                    }
+                  />
+                  <PlayerSelector
+                    label="Bowler"
+                    players={players}
+                    selectedPlayer={selectedPlayers.bowler}
+                    onSelect={(player) =>
+                      setSelectedPlayers((prev) => ({
+                        ...prev,
+                        bowler: player,
+                      }))
+                    }
+                  />
+                </div>
+              )}
             </Card>
-
-            {/* Run Buttons */}
-            <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <div className="flex justify-between items-center mb-6">
+            <Card className="p-6">
+              <div
+                className="flex justify-between items-center mb-6 cursor-pointer"
+                onClick={() => toggleSection('teamScore')}
+              >
                 <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <Cricket className="h-5 w-5 text-primary" />
-                  Scoring
+                  <Activity className="h-5 w-5 text-primary" />
+                  Scoring Controls
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="lg:hidden"
-                  onClick={() => toggleSection('scoring')}
-                >
-                  {mobileMenuOpen.scoring ? <ChevronUp /> : <ChevronDown />}
-                </Button>
+                {mobileMenuOpen.teamScore ? <ChevronUp /> : <ChevronDown />}
               </div>
-
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  {[0, 1, 2, 3, 4, 6].map((runs) => (
-                    <Button
-                      key={runs}
-                      onClick={() => handleEvent(runs.toString())}
-                      variant="outline"
-                      className="h-14 text-xl font-semibold hover:scale-105 transition-transform duration-200"
-                    >
-                      {runs}
-                    </Button>
-                  ))}
+              {mobileMenuOpen.teamScore && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-2">
+                    {[0, 1, 2, 3, 4, 6].map((run) => (
+                      <Button
+                        key={run}
+                        onClick={() => handleEvent(run.toString())}
+                      >
+                        {run === 0 ? 'Dot Ball' : run}
+                      </Button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      'Wide',
+                      'No Ball',
+                      'Bye',
+                      'Leg Bye',
+                      'Wicket',
+                      'New Ball',
+                    ].map((event) => (
+                      <Button
+                        key={event}
+                        onClick={() => handleEvent(event)}
+                        className={
+                          event === 'Wicket' ? 'bg-red-500 text-white' : ''
+                        }
+                      >
+                        {event}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    onClick={() => handleEvent('Wide')}
-                    variant="secondary"
-                    className="h-12 font-semibold"
-                  >
-                    Wide
-                  </Button>
-                  <Button
-                    onClick={() => handleEvent('No Ball')}
-                    variant="secondary"
-                    className="h-12 font-semibold"
-                  >
-                    No Ball
-                  </Button>
-                  <Button
-                    onClick={() => handleEvent('Bye')}
-                    variant="secondary"
-                    className="h-12 font-semibold"
-                  >
-                    Bye
-                  </Button>
-                  <Button
-                    onClick={() => handleEvent('Leg Bye')}
-                    variant="secondary"
-                    className="h-12 font-semibold"
-                  >
-                    Leg Bye
-                  </Button>
-                </div>
-                <Button
-                  onClick={() => handleEvent('Wicket')}
-                  className="w-full h-14 bg-red-500 hover:bg-red-600 text-white font-bold text-lg hover:scale-105 transition-transform duration-200"
-                >
-                  Wicket
-                </Button>
-              </div>
+              )}
             </Card>
           </div>
-
-          {/* Right Column - Scorecards */}
           <div className="space-y-6">
-            {/* Team Scorecard */}
-            <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <div className="flex justify-between items-center mb-6">
+            <Card className="p-6">
+              <div
+                className="flex justify-between items-center mb-6 cursor-pointer"
+                onClick={() => toggleSection('batsmen')}
+              >
                 <h3 className="text-xl font-semibold flex items-center gap-2">
                   <Shield className="h-5 w-5 text-primary" />
                   Team Scorecard
                 </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="lg:hidden"
-                  onClick={() => toggleSection('teamScore')}
-                >
-                  {mobileMenuOpen.teamScore ? <ChevronUp /> : <ChevronDown />}
-                </Button>
+                {mobileMenuOpen.batsmen ? <ChevronUp /> : <ChevronDown />}
               </div>
-
-              <div className="bg-muted/50 rounded-lg p-4">
+              {mobileMenuOpen.batsmen && (
                 <TeamScorecard
-                  teamName={team.name}
                   runs={team.runs}
                   wickets={team.wickets}
+                  overs={team.overs}
+                  balls={team.balls}
                   extras={team.extras}
                 />
-              </div>
+              )}
             </Card>
-
-            {/* Player Scorecard */}
-            <Card className="p-6 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold flex items-center gap-2">
-                  <Cricket className="h-5 w-5 text-primary" />
-                  Player Statistics
-                </h3>
-              </div>
-
-              <div className="bg-muted/50 rounded-lg p-4">
-                <PlayerScorecard
-                  batsmen={[{ name: 'Sachin', runs: 50 }]}
-                  bowlers={[{ name: 'Dhoni', overs: 5, maidens: 1, runs: 30 }]}
-                />
-              </div>
+            <Card className="p-6">
+              <h3 className="text-xl font-semibold flex items-center gap-2 mb-6">
+                <Activity className="h-5 w-5 text-primary" />
+                Commentary Log
+              </h3>
+              <BallLog commentary={commentary} />
             </Card>
           </div>
         </div>
-
-        {/* Ball-by-Ball Commentary */}
-        <Card className="mt-8 p-6 shadow-lg hover:shadow-xl transition-shadow duration-200">
-          <h3 className="text-xl font-semibold flex items-center gap-2 mb-6">
-            <Cricket className="h-5 w-5 text-primary" />
-            Ball by Ball Commentary
-          </h3>
-          <div className="space-y-3 bg-muted/50 rounded-lg p-4 max-h-[300px] overflow-y-auto">
-            {commentary.map((ball, index) => (
-              <BallLog key={index} commentary={[ball]} />
-            ))}
-          </div>
-        </Card>
       </div>
     </div>
   )
 }
 
-export default Home
+export default Page

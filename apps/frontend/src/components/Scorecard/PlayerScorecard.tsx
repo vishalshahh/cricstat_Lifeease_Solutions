@@ -1,14 +1,28 @@
+import React from 'react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+
+interface Batsman {
+  name: string
+  runs: number
+}
+
+interface Bowler {
+  name: string
+  overs: number
+  maidens: number
+  runs: number
+}
+
 interface PlayerScorecardProps {
-  batsmen: Array<{
-    name: string
-    runs: number
-  }>
-  bowlers: Array<{
-    name: string
-    overs: number
-    maidens: number
-    runs: number
-  }>
+  batsmen: Batsman[]
+  bowlers: Bowler[]
 }
 
 export default function PlayerScorecard({
@@ -18,34 +32,46 @@ export default function PlayerScorecard({
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold mb-2">Batsmen</h3>
-        <div className="space-y-2">
-          {batsmen.map((batsman) => (
-            <div
-              key={batsman.name}
-              className="flex justify-between items-center p-2 bg-muted/50 rounded-lg"
-            >
-              <span>{batsman.name}</span>
-              <span className="font-medium">{batsman.runs}</span>
-            </div>
-          ))}
-        </div>
+        <h4 className="text-lg font-semibold mb-2">Batting</h4>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Batsman</TableHead>
+              <TableHead className="text-right">Runs</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {batsmen.map((batsman) => (
+              <TableRow key={batsman.name}>
+                <TableCell>{batsman.name}</TableCell>
+                <TableCell className="text-right">{batsman.runs}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
       <div>
-        <h3 className="font-semibold mb-2">Bowlers</h3>
-        <div className="space-y-2">
-          {bowlers.map((bowler) => (
-            <div
-              key={bowler.name}
-              className="flex justify-between items-center p-2 bg-muted/50 rounded-lg"
-            >
-              <span>{bowler.name}</span>
-              <span className="font-medium">
-                {bowler.overs}-{bowler.maidens}-{bowler.runs}
-              </span>
-            </div>
-          ))}
-        </div>
+        <h4 className="text-lg font-semibold mb-2">Bowling</h4>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Bowler</TableHead>
+              <TableHead className="text-right">Overs</TableHead>
+              <TableHead className="text-right">Maidens</TableHead>
+              <TableHead className="text-right">Runs</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {bowlers.map((bowler) => (
+              <TableRow key={bowler.name}>
+                <TableCell>{bowler.name}</TableCell>
+                <TableCell className="text-right">{bowler.overs}</TableCell>
+                <TableCell className="text-right">{bowler.maidens}</TableCell>
+                <TableCell className="text-right">{bowler.runs}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

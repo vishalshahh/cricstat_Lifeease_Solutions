@@ -1,8 +1,9 @@
+// player/dto/create-player.dto.ts
 import { IsInt, IsString } from 'class-validator'
 
 export class CreatePlayerDto {
   @IsString()
-  teamId: string // Foreign key for Team
+  teamId: string
 
   @IsString()
   name: string
