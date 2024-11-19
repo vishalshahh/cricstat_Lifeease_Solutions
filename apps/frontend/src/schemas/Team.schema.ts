@@ -9,7 +9,11 @@ export class Team extends Document {
   static findById(teamId: string) {
     throw new Error('Method not implemented.')
   }
-  static findByIdAndUpdate(teamId: string, updateData: any, arg2: { new: boolean }) {
+  static findByIdAndUpdate(
+    teamId: string,
+    updateData: any,
+    arg2: { new: boolean },
+  ) {
     throw new Error('Method not implemented.')
   }
   @Prop({ default: () => require('uuid').v4() })

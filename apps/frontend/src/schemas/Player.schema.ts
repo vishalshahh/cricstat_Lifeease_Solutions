@@ -8,7 +8,11 @@ export class Player extends Document {
   static findById(playerId: string) {
     throw new Error('Method not implemented.')
   }
-  static findByIdAndUpdate(playerId: string, updateData: any, arg2: { new: boolean }) {
+  static findByIdAndUpdate(
+    playerId: string,
+    updateData: any,
+    arg2: { new: boolean },
+  ) {
     throw new Error('Method not implemented.')
   }
   @Prop({ default: () => require('uuid').v4() })
